@@ -5,9 +5,10 @@ import type { Room, Player, Team } from '../types';
 import { WavelengthBoard } from '../components/WavelengthBoard';
 import { Button } from '../components/Button';
 import { WAVELENGTH_CARDS } from '../lib/wavelength_cards';
-import { Crown, ArrowRight, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Crown, ArrowRight, Check, ChevronDown, ChevronUp, Clock, Sparkles } from 'lucide-react';
 import Confetti from 'react-confetti';
 import { clsx } from 'clsx';
+import { Layout } from '../components/Layout';
 
 export const WavelengthRoom: React.FC = () => {
     const { roomId } = useParams();
@@ -85,12 +86,6 @@ export const WavelengthRoom: React.FC = () => {
             setTimeLeft(diff);
 
             if (diff === 0 && isDescriber && !room.wavelength_state?.revealed) {
-                // Auto-reveal logic handled by server or describer client? 
-                // Let's have describer trigger it to avoid race conditions
-                // Actually, if time runs out, we should probably just reveal whatever the dial is at.
-                // But wait, describer CAN'T reveal anymore. 
-                // So maybe auto-submit?
-                // Let's auto-reveal for now.
                 handleReveal();
             }
         }, 1000);
@@ -131,10 +126,6 @@ export const WavelengthRoom: React.FC = () => {
         const diff = Math.abs(target - dial);
 
         // Scoring Logic
-        // 4pts: +/- 5% (Total 10% width)
-        // 3pts: +/- 12% (Total 24% width)
-        // 2pts: +/- 20% (Total 40% width)
-
         let points = 0;
         if (diff <= 5) points = 4;
         else if (diff <= 12) points = 3;
@@ -173,7 +164,6 @@ export const WavelengthRoom: React.FC = () => {
         }
 
         // Rotate Describer
-        // We need to track turn index in scores like Scipher
         let nextIndex = 0;
         if (nextTeam === 'neon') {
             const currentIndex = room.scores.neon_turn_index ?? -1;
@@ -213,24 +203,39 @@ export const WavelengthRoom: React.FC = () => {
         await supabase.from('players').update({ team }).eq('id', currentUserId);
     };
 
-    if (!room) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Loading...</div>;
+    if (!room) return <div className="min-h-screen bg-obsidian flex items-center justify-center text-white font-mono animate-pulse">Initializing...</div>;
 
     // Lobby View (if no team selected)
     if (currentPlayer && !currentPlayer.team) {
         return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-                <div className="max-w-md w-full space-y-8 text-center">
-                    <h1 className="text-4xl font-black text-white">Select Team</h1>
-                    <div className="grid grid-cols-2 gap-4">
-                        <Button onClick={() => handleJoinTeam('neon')} className="h-32 bg-gold/10 border-gold/20 hover:bg-gold/20 text-gold">
-                            Team Gold
+            <Layout>
+                <div className="min-h-[80vh] flex flex-col items-center justify-center gap-12">
+                    <div className="text-center space-y-4">
+                        <h1 className="text-5xl font-black text-white tracking-tight">Select Your Allegiance</h1>
+                        <p className="text-silver text-lg font-light">Choose a team to begin the game.</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-8 w-full max-w-2xl">
+                        <Button
+                            onClick={() => handleJoinTeam('neon')}
+                            className="h-48 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-gold/20 to-gold/5 border border-gold/30 hover:border-gold text-gold hover:bg-gold/20 transition-all duration-500 group"
+                        >
+                            <div className="p-4 rounded-full bg-gold/10 group-hover:scale-110 transition-transform">
+                                <Crown className="w-12 h-12" />
+                            </div>
+                            <span className="text-2xl font-black tracking-widest">TEAM GOLD</span>
                         </Button>
-                        <Button onClick={() => handleJoinTeam('cyber')} className="h-32 bg-royal/10 border-royal/20 hover:bg-royal/20 text-royal">
-                            Team Royal
+                        <Button
+                            onClick={() => handleJoinTeam('cyber')}
+                            className="h-48 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-royal/20 to-royal/5 border border-royal/30 hover:border-royal text-royal-light hover:bg-royal/20 transition-all duration-500 group"
+                        >
+                            <div className="p-4 rounded-full bg-royal/10 group-hover:scale-110 transition-transform">
+                                <Sparkles className="w-12 h-12" />
+                            </div>
+                            <span className="text-2xl font-black tracking-widest">TEAM ROYAL</span>
                         </Button>
                     </div>
                 </div>
-            </div>
+            </Layout>
         );
     }
 
@@ -238,149 +243,154 @@ export const WavelengthRoom: React.FC = () => {
     const cyberPlayers = players.filter(p => p.team === 'cyber');
 
     return (
-        <div className="min-h-screen bg-slate-950 flex flex-col overflow-hidden relative">
-            {showConfetti && <Confetti numberOfPieces={200} recycle={false} />}
+        <Layout>
+            <div className="flex flex-col h-full min-h-[90vh]">
+                {showConfetti && <Confetti numberOfPieces={200} recycle={false} colors={['#d4af37', '#f1c40f', '#ffffff']} />}
 
-            {/* Header */}
-            <div className="flex justify-between items-center p-4 max-w-7xl mx-auto w-full z-10">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-                        Exit
-                    </Button>
-                    <div className="px-4 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-sm font-mono">
-                        Round {room.current_round}/{room.total_rounds}
+                {/* Header */}
+                <div className="flex justify-between items-center mb-8 glass-panel p-4 rounded-2xl">
+                    <div className="flex items-center gap-6">
+                        <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="text-xs tracking-widest uppercase">
+                            Exit
+                        </Button>
+                        <div className="h-8 w-px bg-white/10" />
+                        <div className="flex items-center gap-2 text-silver font-mono text-sm">
+                            <span className="text-white font-bold">ROUND {room.current_round}</span>
+                            <span className="opacity-50">/</span>
+                            <span className="opacity-50">{room.total_rounds}</span>
+                        </div>
+                        <div className={clsx(
+                            "flex items-center gap-2 px-4 py-1.5 rounded-full border text-sm font-mono tabular-nums transition-colors duration-300",
+                            timeLeft <= 10 ? "bg-red-900/20 border-red-500 text-red-400 animate-pulse" : "bg-white/5 border-white/10 text-silver"
+                        )}>
+                            <Clock className="w-3 h-3" />
+                            {timeLeft}s
+                        </div>
                     </div>
-                    <div className={clsx(
-                        "px-4 py-1 rounded-full border text-sm font-mono tabular-nums",
-                        timeLeft <= 10 ? "bg-red-500/20 border-red-500 text-red-400 animate-pulse" : "bg-slate-800 border-slate-700 text-slate-400"
-                    )}>
-                        {timeLeft}s
+
+                    <div className="flex gap-12 text-3xl font-black tracking-tighter">
+                        <div className={clsx("flex items-center gap-4 transition-all duration-500", room.turn_team === 'neon' ? "scale-110 opacity-100" : "opacity-40 scale-95 grayscale")}>
+                            <span className="text-gold drop-shadow-[0_0_15px_rgba(212,175,55,0.5)]">GOLD</span>
+                            <span className="text-white tabular-nums">{room.scores.neon}</span>
+                        </div>
+                        <div className={clsx("flex items-center gap-4 transition-all duration-500", room.turn_team === 'cyber' ? "scale-110 opacity-100" : "opacity-40 scale-95 grayscale")}>
+                            <span className="text-royal-light drop-shadow-[0_0_15px_rgba(75,0,130,0.5)]">ROYAL</span>
+                            <span className="text-white tabular-nums">{room.scores.cyber}</span>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex gap-8 text-2xl font-black">
-                    <div className={clsx("flex items-center gap-3 transition-all duration-500", room.turn_team === 'neon' ? "scale-125 opacity-100" : "opacity-50 scale-90")}>
-                        <span className="text-gold drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">GOLD</span>
-                        <span className="text-white">{room.scores.neon}</span>
-                    </div>
-                    <div className={clsx("flex items-center gap-3 transition-all duration-500", room.turn_team === 'cyber' ? "scale-125 opacity-100" : "opacity-50 scale-90")}>
-                        <span className="text-royal drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">ROYAL</span>
-                        <span className="text-white">{room.scores.cyber}</span>
-                    </div>
-                </div>
-            </div>
+                {/* Main Game Area */}
+                <div className="flex-1 flex w-full gap-8">
 
-            {/* Main Layout */}
-            <div className="flex-1 flex w-full max-w-7xl mx-auto relative">
-
-                {/* Left Team List (Gold) */}
-                <div className="w-64 p-4 hidden lg:flex flex-col gap-4">
-                    <div
-                        className="flex items-center justify-between p-3 bg-gold/10 border border-gold/20 rounded-xl cursor-pointer hover:bg-gold/20 transition-colors"
-                        onClick={() => setShowNeonPlayers(!showNeonPlayers)}
-                    >
-                        <span className="font-bold text-gold">Team Gold</span>
-                        {showNeonPlayers ? <ChevronUp className="w-4 h-4 text-gold" /> : <ChevronDown className="w-4 h-4 text-gold" />}
-                    </div>
-                    {(showNeonPlayers || true) && ( // Always show for now on desktop
-                        <div className="space-y-2">
+                    {/* Left Team List (Gold) */}
+                    <div className="w-72 hidden lg:flex flex-col gap-4">
+                        <div
+                            className="flex items-center justify-between p-4 bg-gradient-to-r from-gold/10 to-transparent border-l-4 border-gold rounded-r-xl cursor-pointer hover:bg-gold/5 transition-colors"
+                            onClick={() => setShowNeonPlayers(!showNeonPlayers)}
+                        >
+                            <span className="font-bold text-gold tracking-widest">ROSTER</span>
+                            {showNeonPlayers ? <ChevronUp className="w-4 h-4 text-gold" /> : <ChevronDown className="w-4 h-4 text-gold" />}
+                        </div>
+                        <div className="space-y-2 pl-4">
                             {neonPlayers.map(p => (
                                 <div key={p.id} className={clsx(
-                                    "p-2 rounded-lg text-sm flex items-center gap-2",
-                                    p.id === room.turn_describer_id ? "bg-gold/20 text-gold border border-gold/30" : "text-slate-400"
+                                    "p-3 rounded-lg text-sm flex items-center gap-3 transition-all duration-300",
+                                    p.id === room.turn_describer_id ? "bg-gold/20 text-gold border border-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.2)] translate-x-2" : "text-silver/60 hover:text-silver hover:bg-white/5"
                                 )}>
-                                    {p.id === room.turn_describer_id && <Crown className="w-3 h-3" />}
-                                    {p.name}
+                                    {p.id === room.turn_describer_id ? <Crown className="w-4 h-4 animate-bounce" /> : <div className="w-4" />}
+                                    <span className="font-medium tracking-wide truncate">{p.name}</span>
                                 </div>
                             ))}
                         </div>
-                    )}
-                </div>
+                    </div>
 
-                {/* Center Game Area */}
-                <div className="flex-1 flex flex-col items-center justify-center gap-8 px-4">
+                    {/* Center Board */}
+                    <div className="flex-1 flex flex-col items-center justify-center gap-12">
 
-                    {/* Status Text */}
-                    <div className="text-center space-y-2">
-                        {room.wavelength_state?.revealed ? (
-                            <h2 className="text-5xl font-black text-white animate-in zoom-in drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
-                                {Math.abs(room.wavelength_state.target_percent - room.wavelength_state.dial_percent) <= 5 ? "PERFECT!" :
-                                    Math.abs(room.wavelength_state.target_percent - room.wavelength_state.dial_percent) <= 12 ? "GREAT!" :
-                                        Math.abs(room.wavelength_state.target_percent - room.wavelength_state.dial_percent) <= 20 ? "OKAY" : "MISS"}
-                            </h2>
-                        ) : (
-                            <h2 className="text-4xl font-bold text-white drop-shadow-lg">
-                                {isDescriber ? "Give a clue!" : isGuesser ? "Tune the dial!" : `${players.find(p => p.id === room.turn_describer_id)?.name} is thinking...`}
-                            </h2>
-                        )}
-                        <div className="flex items-center justify-center gap-2 text-slate-400 bg-slate-900/50 py-1 px-4 rounded-full border border-slate-800 inline-block">
-                            {isDescriber && <Crown className="w-4 h-4 text-yellow-500" />}
-                            <span>Current Describer: {players.find(p => p.id === room.turn_describer_id)?.name}</span>
+                        {/* Status Text */}
+                        <div className="text-center space-y-4">
+                            {room.wavelength_state?.revealed ? (
+                                <h2 className="text-6xl font-black text-white animate-in zoom-in duration-500 drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]">
+                                    {Math.abs(room.wavelength_state.target_percent - room.wavelength_state.dial_percent) <= 5 ? "PERFECT!" :
+                                        Math.abs(room.wavelength_state.target_percent - room.wavelength_state.dial_percent) <= 12 ? "GREAT!" :
+                                            Math.abs(room.wavelength_state.target_percent - room.wavelength_state.dial_percent) <= 20 ? "OKAY" : "MISS"}
+                                </h2>
+                            ) : (
+                                <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-silver drop-shadow-xl">
+                                    {isDescriber ? "GIVE A CLUE" : isGuesser ? "TUNE THE DIAL" : "AWAITING TRANSMISSION..."}
+                                </h2>
+                            )}
+
+                            <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-obsidian-light border border-white/10 shadow-lg">
+                                {isDescriber && <Crown className="w-4 h-4 text-gold animate-pulse" />}
+                                <span className="text-silver text-sm font-mono tracking-widest uppercase">
+                                    Current Describer: <span className="text-white font-bold">{players.find(p => p.id === room.turn_describer_id)?.name}</span>
+                                </span>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* The Board */}
-                    <div className="w-full">
-                        <WavelengthBoard
-                            targetPercent={room.wavelength_state?.target_percent || 50}
-                            dialPercent={room.wavelength_state?.dial_percent || 50}
-                            onChange={handleDialChange}
-                            revealed={room.wavelength_state?.revealed || isDescriber} // Describer always sees target
-                            disabled={!isGuesser || room.wavelength_state?.revealed}
-                            leftLabel={room.wavelength_state?.spectrum_card.left || 'Left'}
-                            rightLabel={room.wavelength_state?.spectrum_card.right || 'Right'}
-                        />
-                    </div>
+                        {/* The Board */}
+                        <div className="w-full transform scale-100 hover:scale-[1.01] transition-transform duration-700">
+                            <WavelengthBoard
+                                targetPercent={room.wavelength_state?.target_percent || 50}
+                                dialPercent={room.wavelength_state?.dial_percent || 50}
+                                onChange={handleDialChange}
+                                revealed={room.wavelength_state?.revealed || isDescriber}
+                                disabled={!isGuesser || room.wavelength_state?.revealed}
+                                leftLabel={room.wavelength_state?.spectrum_card.left || 'Left'}
+                                rightLabel={room.wavelength_state?.spectrum_card.right || 'Right'}
+                            />
+                        </div>
 
-                    {/* Controls */}
-                    <div className="h-24 flex items-center justify-center w-full">
-                        {room.wavelength_state?.revealed ? (
-                            <Button onClick={handleNextRound} size="lg" className="bg-white text-slate-900 hover:bg-slate-200 font-black text-xl px-12 py-6 rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 transition-transform">
-                                Next Round <ArrowRight className="ml-2 w-6 h-6" />
-                            </Button>
-                        ) : (
-                            isDescriber ? (
-                                <div className="text-slate-400 text-lg animate-pulse font-medium">
-                                    Waiting for your team to guess...
-                                </div>
-                            ) : isGuesser ? (
-                                <Button onClick={handleReveal} size="lg" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xl px-12 py-6 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.4)] hover:scale-105 transition-transform">
-                                    <Check className="mr-2 w-6 h-6" /> SUBMIT GUESS
+                        {/* Controls */}
+                        <div className="h-24 flex items-center justify-center w-full">
+                            {room.wavelength_state?.revealed ? (
+                                <Button onClick={handleNextRound} size="lg" variant="outline" className="font-black text-xl px-12 py-6 border-white/20 hover:bg-white/10 hover:border-white/40">
+                                    NEXT ROUND <ArrowRight className="ml-3 w-6 h-6" />
                                 </Button>
                             ) : (
-                                <div className="text-slate-500 text-lg">
-                                    Spectating...
-                                </div>
-                            )
-                        )}
+                                isDescriber ? (
+                                    <div className="text-silver/50 text-lg font-light tracking-widest animate-pulse">
+                                        WAITING FOR TEAM...
+                                    </div>
+                                ) : isGuesser ? (
+                                    <Button onClick={handleReveal} size="lg" variant="gold" className="font-black text-xl px-12 py-6 shadow-[0_0_40px_rgba(212,175,55,0.3)]">
+                                        <Check className="mr-3 w-6 h-6" /> LOCK IN GUESS
+                                    </Button>
+                                ) : (
+                                    <div className="text-silver/30 text-lg font-mono tracking-widest">
+                                        SPECTATING MODE
+                                    </div>
+                                )
+                            )}
+                        </div>
                     </div>
-                </div>
 
-                {/* Right Team List (Royal) */}
-                <div className="w-64 p-4 hidden lg:flex flex-col gap-4">
-                    <div
-                        className="flex items-center justify-between p-3 bg-royal/10 border border-royal/20 rounded-xl cursor-pointer hover:bg-royal/20 transition-colors"
-                        onClick={() => setShowCyberPlayers(!showCyberPlayers)}
-                    >
-                        <span className="font-bold text-royal">Team Royal</span>
-                        {showCyberPlayers ? <ChevronUp className="w-4 h-4 text-royal" /> : <ChevronDown className="w-4 h-4 text-royal" />}
-                    </div>
-                    {(showCyberPlayers || true) && ( // Always show for now on desktop
-                        <div className="space-y-2">
+                    {/* Right Team List (Royal) */}
+                    <div className="w-72 hidden lg:flex flex-col gap-4">
+                        <div
+                            className="flex items-center justify-between p-4 bg-gradient-to-l from-royal/10 to-transparent border-r-4 border-royal rounded-l-xl cursor-pointer hover:bg-royal/5 transition-colors"
+                            onClick={() => setShowCyberPlayers(!showCyberPlayers)}
+                        >
+                            <span className="font-bold text-royal-light tracking-widest">ROSTER</span>
+                            {showCyberPlayers ? <ChevronUp className="w-4 h-4 text-royal-light" /> : <ChevronDown className="w-4 h-4 text-royal-light" />}
+                        </div>
+                        <div className="space-y-2 pr-4">
                             {cyberPlayers.map(p => (
                                 <div key={p.id} className={clsx(
-                                    "p-2 rounded-lg text-sm flex items-center gap-2",
-                                    p.id === room.turn_describer_id ? "bg-royal/20 text-royal border border-royal/30" : "text-slate-400"
+                                    "p-3 rounded-lg text-sm flex items-center justify-end gap-3 transition-all duration-300",
+                                    p.id === room.turn_describer_id ? "bg-royal/20 text-royal-light border border-royal/30 shadow-[0_0_15px_rgba(75,0,130,0.2)] -translate-x-2" : "text-silver/60 hover:text-silver hover:bg-white/5"
                                 )}>
-                                    {p.id === room.turn_describer_id && <Crown className="w-3 h-3" />}
-                                    {p.name}
+                                    <span className="font-medium tracking-wide truncate">{p.name}</span>
+                                    {p.id === room.turn_describer_id ? <Crown className="w-4 h-4 animate-bounce" /> : <div className="w-4" />}
                                 </div>
                             ))}
                         </div>
-                    )}
-                </div>
+                    </div>
 
+                </div>
             </div>
-        </div>
+        </Layout>
     );
 };

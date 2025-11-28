@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Brain, Radio, ArrowRight, Sparkles } from 'lucide-react';
+import { Brain, Radio, ArrowRight, Crown } from 'lucide-react';
 import { clsx } from 'clsx';
+import { Layout } from '../components/Layout';
 
 export const GameHub: React.FC = () => {
     const navigate = useNavigate();
@@ -9,98 +10,105 @@ export const GameHub: React.FC = () => {
     const games = [
         {
             id: 'scipher',
-            title: 'Scipher',
-            description: 'The ultimate team word-guessing game. Describe, guess, and decode your way to victory.',
+            title: 'SCIPHER',
+            description: 'The ultimate team word-guessing game. Decode the message.',
             icon: Brain,
-            color: 'text-blue-400',
-            bg: 'bg-blue-500/10',
-            border: 'border-blue-500/20',
-            hoverBorder: 'group-hover:border-blue-500/50',
-            hoverShadow: 'group-hover:shadow-blue-500/20',
+            color: 'text-gold',
+            gradient: 'from-gold to-gold-dark',
+            border: 'border-gold/20',
+            shadow: 'shadow-gold/10',
             path: '/scipher'
         },
         {
             id: 'wavelength',
-            title: 'Wavelength',
-            description: 'A telepathic party game. Tune into your team\'s frequency and find the hidden target.',
+            title: 'WAVELENGTH',
+            description: 'Tune into your team\'s frequency. Find the hidden target.',
             icon: Radio,
-            color: 'text-rose-400',
-            bg: 'bg-rose-500/10',
-            border: 'border-rose-500/20',
-            hoverBorder: 'group-hover:border-rose-500/50',
-            hoverShadow: 'group-hover:shadow-rose-500/20',
+            color: 'text-royal-light',
+            gradient: 'from-royal-light to-royal',
+            border: 'border-royal/20',
+            shadow: 'shadow-royal/10',
             path: '/wavelength'
         }
     ];
 
     return (
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden">
-            {/* Background Effects */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] animate-pulse" />
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px] animate-pulse delay-1000" />
+        <Layout>
+            <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-16">
 
-            <div className="max-w-5xl w-full relative z-10 space-y-12">
-                {/* Header */}
-                <div className="text-center space-y-4 animate-in fade-in slide-in-from-top-8 duration-700">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/50 border border-slate-800 text-slate-400 text-sm font-medium mb-4 backdrop-blur-sm">
-                        <Sparkles className="w-4 h-4 text-gold" />
-                        <span>Multi-Game Platform</span>
+                {/* Hero Section */}
+                <div className="text-center space-y-6 animate-in fade-in slide-in-from-top-8 duration-1000">
+                    <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/5 border border-white/10 text-gold text-sm font-bold tracking-widest uppercase backdrop-blur-md shadow-lg animate-float">
+                        <Crown className="w-4 h-4" />
+                        <span>Premium Game Suite</span>
                     </div>
-                    <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter drop-shadow-2xl">
-                        CIPHER<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">SAY</span>
-                    </h1>
-                    <p className="text-xl text-slate-400 max-w-2xl mx-auto font-light">
-                        Choose your challenge. Test your communication.
+
+                    <div className="relative">
+                        <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-silver-light to-silver drop-shadow-2xl">
+                            CIPHER<span className="text-gold">SAY</span>
+                        </h1>
+                        <div className="absolute -inset-10 bg-gold/20 blur-[100px] -z-10 animate-pulse-slow" />
+                    </div>
+
+                    <p className="text-xl text-silver max-w-2xl mx-auto font-light tracking-wide leading-relaxed">
+                        Elevate your game night with our collection of <span className="text-gold font-medium">luxury social experiences</span>.
                     </p>
                 </div>
 
-                {/* Game Grid */}
-                <div className="grid md:grid-cols-2 gap-8">
+                {/* Game Cards */}
+                <div className="grid md:grid-cols-2 gap-8 w-full max-w-5xl px-4">
                     {games.map((game, idx) => (
                         <div
                             key={game.id}
                             onClick={() => navigate(game.path)}
                             className={clsx(
-                                "group relative p-8 rounded-3xl border-2 cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl bg-slate-900/50 backdrop-blur-xl flex flex-col gap-6 overflow-hidden",
+                                "group relative p-10 rounded-[2rem] border cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] flex flex-col gap-8 overflow-hidden glass-panel",
                                 game.border,
-                                game.hoverBorder,
-                                game.hoverShadow
+                                "hover:border-white/20"
                             )}
-                            style={{ animationDelay: `${idx * 150}ms` }}
+                            style={{ animationDelay: `${idx * 200}ms` }}
                         >
-                            {/* Hover Gradient */}
+                            {/* Hover Gradient Overlay */}
                             <div className={clsx(
-                                "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"
+                                "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br pointer-events-none",
+                                game.id === 'scipher' ? "from-gold/10 via-transparent to-transparent" : "from-royal/10 via-transparent to-transparent"
                             )} />
 
-                            <div className="flex items-start justify-between">
-                                <div className={clsx("p-4 rounded-2xl", game.bg)}>
-                                    <game.icon className={clsx("w-10 h-10", game.color)} />
+                            <div className="flex items-start justify-between relative z-10">
+                                <div className={clsx(
+                                    "p-5 rounded-2xl bg-gradient-to-br shadow-lg group-hover:shadow-2xl transition-all duration-500",
+                                    game.gradient
+                                )}>
+                                    <game.icon className="w-12 h-12 text-obsidian" />
                                 </div>
-                                <div className="p-2 rounded-full bg-slate-800/50 text-slate-500 group-hover:text-white group-hover:bg-slate-700 transition-colors">
+                                <div className="p-3 rounded-full bg-white/5 text-silver group-hover:text-white group-hover:bg-white/10 transition-colors border border-white/5 group-hover:border-white/20">
                                     <ArrowRight className="w-6 h-6" />
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <h2 className="text-4xl font-black text-white tracking-tight">{game.title}</h2>
-                                <p className="text-slate-400 text-lg leading-relaxed">{game.description}</p>
+                            <div className="space-y-3 relative z-10">
+                                <h2 className={clsx("text-5xl font-black tracking-tighter", game.color)}>
+                                    {game.title}
+                                </h2>
+                                <p className="text-silver text-lg font-light leading-relaxed">
+                                    {game.description}
+                                </p>
                             </div>
 
-                            {/* Decorative Elements */}
+                            {/* Decorative Glow */}
                             <div className={clsx(
-                                "absolute -bottom-12 -right-12 w-48 h-48 rounded-full blur-3xl opacity-20 transition-opacity duration-500 group-hover:opacity-40",
-                                game.bg.replace('/10', '/30')
+                                "absolute -bottom-24 -right-24 w-64 h-64 rounded-full blur-[80px] opacity-20 transition-opacity duration-500 group-hover:opacity-40",
+                                game.id === 'scipher' ? "bg-gold" : "bg-royal"
                             )} />
                         </div>
                     ))}
                 </div>
-            </div>
 
-            {/* Footer */}
-            <div className="absolute bottom-8 text-slate-600 text-sm font-mono">
-                v0.2.0 • BETA
+                {/* Footer */}
+                <div className="text-silver/30 text-xs font-mono tracking-[0.2em] uppercase">
+                    Designed for Excellence
+                </div>
             </div>
-        </div>
+        </Layout>
     );
 };

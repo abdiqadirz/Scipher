@@ -4,7 +4,7 @@ import { Layout } from '../components/Layout';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { supabase } from '../lib/supabase';
-import { Radio, Users } from 'lucide-react';
+import { Radio, Users, Crown } from 'lucide-react';
 
 export const WavelengthLobby: React.FC = () => {
     const navigate = useNavigate();
@@ -153,66 +153,71 @@ export const WavelengthLobby: React.FC = () => {
     return (
         <Layout>
             <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-12">
-                <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="inline-flex items-center justify-center p-4 bg-rose-500/10 rounded-full mb-6 ring-1 ring-rose-500/50 shadow-[0_0_30px_rgba(244,63,94,0.3)]">
-                        <Radio className="w-12 h-12 text-rose-500" />
+                <div className="text-center mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="inline-flex items-center justify-center p-6 bg-royal/10 rounded-full mb-8 ring-1 ring-royal/50 shadow-[0_0_50px_rgba(75,0,130,0.3)] backdrop-blur-xl animate-float">
+                        <Radio className="w-16 h-16 text-royal-light" />
                     </div>
-                    <h1 className="text-6xl font-black text-white tracking-tighter drop-shadow-2xl mb-2">
+                    <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-royal-light to-royal tracking-tighter drop-shadow-2xl mb-4">
                         WAVELENGTH
                     </h1>
-                    <p className="text-slate-400 text-lg font-light tracking-wide">
-                        Tune into your team's frequency.
+                    <p className="text-silver text-xl font-light tracking-widest uppercase">
+                        Tune into your team's frequency
                     </p>
                 </div>
 
-                <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
+                <div className="w-full max-w-lg space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150 glass-panel p-8 rounded-[2rem]">
                     <div className="space-y-4">
+                        <label className="text-xs font-bold text-royal-light uppercase tracking-widest ml-1">Your Identity</label>
                         <Input
-                            placeholder="Enter your name"
+                            placeholder="ENTER YOUR NAME"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="bg-slate-900/50 border-slate-800 focus:border-rose-500 focus:ring-rose-500/20 text-lg py-6"
+                            className="text-lg py-4 font-bold tracking-wide text-center uppercase"
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-6">
                         <Button
+                            variant="royal"
                             onClick={handleCreateRoom}
                             disabled={isCreating || isJoining}
-                            className="h-32 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-rose-600 to-rose-800 hover:from-rose-500 hover:to-rose-700 border-0 shadow-lg hover:shadow-rose-500/25 transition-all duration-300"
+                            className="h-40 flex flex-col items-center justify-center gap-4 border-0 shadow-2xl hover:shadow-royal/50 transition-all duration-500 group"
                         >
-                            <Radio className="w-8 h-8" />
-                            <span className="text-lg font-bold">Create Room</span>
+                            <div className="p-4 rounded-full bg-white/10 group-hover:scale-110 transition-transform duration-300">
+                                <Crown className="w-8 h-8" />
+                            </div>
+                            <span className="text-lg font-black tracking-wide">CREATE ROOM</span>
                         </Button>
 
-                        <div className="space-y-2">
+                        <div className="space-y-4">
                             <Input
-                                placeholder="Room Code"
+                                placeholder="CODE"
                                 value={roomCode}
                                 onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                                 maxLength={4}
-                                className="text-center uppercase tracking-[0.5em] font-mono bg-slate-900/50 border-slate-800 focus:border-rose-500 focus:ring-rose-500/20 h-[3.5rem]"
+                                className="text-center text-2xl uppercase tracking-[0.5em] font-mono h-[4.5rem] font-bold"
                             />
                             <Button
+                                variant="outline"
                                 onClick={handleJoinRoom}
                                 disabled={isCreating || isJoining}
-                                className="w-full h-[calc(8rem-4.5rem)] bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300"
+                                className="w-full h-[calc(10rem-5.5rem)] border-white/10 hover:bg-white/5 hover:border-royal-light/50 text-silver hover:text-white transition-all duration-300"
                             >
                                 <Users className="w-5 h-5 mr-2" />
-                                Join Room
+                                JOIN ROOM
                             </Button>
                         </div>
                     </div>
 
                     {error && (
-                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-center text-sm font-medium animate-in fade-in slide-in-from-top-2">
+                        <div className="p-4 bg-red-900/20 border border-red-500/20 rounded-xl text-red-300 text-center text-sm font-bold tracking-wide animate-in fade-in slide-in-from-top-2">
                             {error}
                         </div>
                     )}
 
-                    <div className="text-center">
-                        <button onClick={() => navigate('/')} className="text-slate-500 hover:text-slate-300 text-sm underline underline-offset-4 transition-colors">
-                            Back to Game Hub
+                    <div className="text-center pt-4 border-t border-white/5">
+                        <button onClick={() => navigate('/')} className="text-silver/50 hover:text-white text-xs font-mono tracking-widest uppercase transition-colors">
+                            Return to Hub
                         </button>
                     </div>
                 </div>
