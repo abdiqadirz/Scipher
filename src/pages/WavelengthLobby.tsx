@@ -14,6 +14,9 @@ export const WavelengthLobby: React.FC = () => {
     const [isJoining, setIsJoining] = useState(false);
     const [error, setError] = useState('');
 
+    const [roundLength, setRoundLength] = useState(60);
+    const [showSettings, setShowSettings] = useState(false);
+
     const generateRoomCode = () => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let result = '';
@@ -49,6 +52,7 @@ export const WavelengthLobby: React.FC = () => {
                     game_type: 'wavelength',
                     current_round: 1,
                     total_rounds: 12,
+                    round_length: roundLength,
                     scores: { neon: 0, cyber: 0 },
                     turn_describer_id: playerId, // Host is first describer
                     wavelength_state: {
@@ -174,6 +178,24 @@ export const WavelengthLobby: React.FC = () => {
                             onChange={(e) => setName(e.target.value)}
                             className="text-lg py-4 font-bold tracking-wide text-center uppercase"
                         />
+                    </div>
+
+                    <div className="space-y-4">
+                        <button
+                            onClick={() => setShowSettings(!showSettings)}
+                            className="text-xs font-bold text-silver hover:text-white uppercase tracking-widest flex items-center gap-2 mx-auto"
+                        >
+                            <span>{showSettings ? 'Hide' : 'Show'} Game Settings</span>
+                        </button>
+
+                        {showSettings && (
+                            <div className="p-4 bg-black/20 rounded-xl border border-white/5 animate-in slide-in-from-top-2">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-silver uppercase">Round Timer (s)</label>
+                                    <Input type="number" value={roundLength} onChange={(e) => setRoundLength(Number(e.target.value))} className="text-center" />
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">

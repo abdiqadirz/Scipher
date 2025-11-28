@@ -217,8 +217,16 @@ export const ThePlantRoom: React.FC = () => {
                         <p className="text-silver text-lg">Waiting for players...</p>
                     </div>
 
-                    <div className="bg-obsidian-light/50 p-8 rounded-2xl border border-emerald-500/20 w-full max-w-md">
-                        <div className="space-y-4">
+                    <div className="bg-obsidian-light/50 p-8 rounded-2xl border border-emerald-500/20 w-full max-w-md relative overflow-hidden">
+                        {/* Room Code Badge */}
+                        <div className="absolute top-4 right-4 flex flex-col items-end">
+                            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Room Code</span>
+                            <div className="text-2xl font-mono font-black text-white tracking-widest bg-emerald-500/20 px-3 py-1 rounded-lg border border-emerald-500/30">
+                                {room.id}
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 mt-4">
                             {players.map(p => (
                                 <div key={p.id} className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
                                     <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -231,9 +239,70 @@ export const ThePlantRoom: React.FC = () => {
                     </div>
 
                     {isHost && (
-                        <Button onClick={handleStartGame} size="lg" className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-12 py-6 shadow-lg shadow-emerald-500/20">
-                            START GAME
-                        </Button>
+                        <div className="w-full max-w-md space-y-6">
+                            <div className="grid grid-cols-2 gap-4 p-4 bg-black/20 rounded-xl border border-white/5">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-silver uppercase">Draft (s)</label>
+                                    <Input
+                                        type="number"
+                                        value={plantState.settings.draft_time}
+                                        onChange={async (e) => {
+                                            const val = Number(e.target.value);
+                                            await supabase.from('rooms').update({
+                                                plant_state: { ...plantState, settings: { ...plantState.settings, draft_time: val } }
+                                            }).eq('id', room.id);
+                                        }}
+                                        className="text-center h-10"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-silver uppercase">Monologue (s)</label>
+                                    <Input
+                                        type="number"
+                                        value={plantState.settings.monologue_time}
+                                        onChange={async (e) => {
+                                            const val = Number(e.target.value);
+                                            await supabase.from('rooms').update({
+                                                plant_state: { ...plantState, settings: { ...plantState.settings, monologue_time: val } }
+                                            }).eq('id', room.id);
+                                        }}
+                                        className="text-center h-10"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-silver uppercase">Grill (s)</label>
+                                    <Input
+                                        type="number"
+                                        value={plantState.settings.grill_time}
+                                        onChange={async (e) => {
+                                            const val = Number(e.target.value);
+                                            await supabase.from('rooms').update({
+                                                plant_state: { ...plantState, settings: { ...plantState.settings, grill_time: val } }
+                                            }).eq('id', room.id);
+                                        }}
+                                        className="text-center h-10"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-silver uppercase">Huddle (s)</label>
+                                    <Input
+                                        type="number"
+                                        value={plantState.settings.huddle_time}
+                                        onChange={async (e) => {
+                                            const val = Number(e.target.value);
+                                            await supabase.from('rooms').update({
+                                                plant_state: { ...plantState, settings: { ...plantState.settings, huddle_time: val } }
+                                            }).eq('id', room.id);
+                                        }}
+                                        className="text-center h-10"
+                                    />
+                                </div>
+                            </div>
+
+                            <Button onClick={handleStartGame} size="lg" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black px-12 py-6 shadow-lg shadow-emerald-500/20">
+                                START GAME
+                            </Button>
+                        </div>
                     )}
                 </div>
             </Layout>

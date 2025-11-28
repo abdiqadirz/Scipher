@@ -210,7 +210,13 @@ export const WavelengthRoom: React.FC = () => {
         return (
             <Layout>
                 <div className="min-h-[80vh] flex flex-col items-center justify-center gap-12">
-                    <div className="text-center space-y-4">
+                    <div className="text-center space-y-4 relative">
+                        <div className="absolute top-0 right-0 md:right-auto md:left-1/2 md:-translate-x-1/2 -translate-y-16 flex flex-col items-center">
+                            <span className="text-[10px] font-bold text-royal-light uppercase tracking-widest">Room Code</span>
+                            <div className="text-2xl font-mono font-black text-white tracking-widest bg-royal/20 px-4 py-2 rounded-lg border border-royal/30">
+                                {room.id}
+                            </div>
+                        </div>
                         <h1 className="text-5xl font-black text-white tracking-tight">Select Your Allegiance</h1>
                         <p className="text-silver text-lg font-light">Choose a team to begin the game.</p>
                     </div>
@@ -248,7 +254,7 @@ export const WavelengthRoom: React.FC = () => {
                 {showConfetti && <Confetti numberOfPieces={200} recycle={false} colors={['#d4af37', '#f1c40f', '#ffffff']} />}
 
                 {/* Header */}
-                <div className="flex justify-between items-center mb-8 glass-panel p-4 rounded-2xl">
+                <div className="flex justify-between items-center mb-8 glass-panel p-4 rounded-2xl relative">
                     <div className="flex items-center gap-6">
                         <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="text-xs tracking-widest uppercase">
                             Exit
@@ -266,6 +272,29 @@ export const WavelengthRoom: React.FC = () => {
                             <Clock className="w-3 h-3" />
                             {timeLeft}s
                         </div>
+
+                        {currentPlayer?.is_host && (
+                            <>
+                                <div className="h-8 w-px bg-white/10" />
+                                <div className="relative group">
+                                    <Button variant="ghost" size="sm" className="text-xs tracking-widest uppercase text-silver hover:text-white">
+                                        Settings
+                                    </Button>
+                                    <div className="absolute top-full left-0 mt-2 w-48 bg-obsidian-light border border-white/10 rounded-xl p-4 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto z-50">
+                                        <label className="text-[10px] font-bold text-silver uppercase mb-2 block">Round Timer (s)</label>
+                                        <input
+                                            type="number"
+                                            className="w-full bg-black/20 border border-white/10 rounded px-2 py-1 text-white text-center font-mono"
+                                            value={room.round_length || 60}
+                                            onChange={async (e) => {
+                                                const val = Number(e.target.value);
+                                                await supabase.from('rooms').update({ round_length: val }).eq('id', room.id);
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     <div className="flex gap-12 text-3xl font-black tracking-tighter">
