@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold: #fbbf24;
+  --color-gold-glow: #fde68a;
+  --color-royal: #6366f1;
+  --color-royal-glow: #c7d2fe;
+  --color-dark-bg: #0f172a;
+  --color-dark-surface: #1e293b;
+
+  --animate-pulse-fast: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-900 text-white antialiased;
+  }
+}
+
+.gold-text {
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.7), 0 0 20px rgba(251, 191, 36, 0.5);
+}
+
+.royal-text {
+  text-shadow: 0 0 10px rgba(99, 102, 241, 0.7), 0 0 20px rgba(99, 102, 241, 0.5);
+}
