@@ -18,6 +18,7 @@ export interface Room {
     id: string;
     created_at: string;
     status: 'lobby' | 'playing' | 'finished';
+    game_type: 'scipher' | 'wavelength';
     current_round: number;
     total_rounds: number;
     round_length: number;
@@ -37,6 +38,15 @@ export interface Room {
         cyber: number;
         neon_turn_index?: number;
         cyber_turn_index?: number;
+    };
+    wavelength_state?: {
+        target_percent: number; // 0-100
+        dial_percent: number;   // 0-100
+        spectrum_card: {
+            left: string;
+            right: string;
+        };
+        revealed: boolean;
     };
     last_updated: string;
 }

@@ -285,7 +285,7 @@ export const GameRoom: React.FC = () => {
                             </div>
                         </div>
 
-                        <Button onClick={() => navigate('/')} size="lg" variant="primary">
+                        <Button onClick={() => navigate('/scipher')} size="lg" variant="primary">
                             Back to Lobby
                         </Button>
 

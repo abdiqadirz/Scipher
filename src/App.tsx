@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { GameHub } from './pages/GameHub';
 import { Home } from './pages/Home';
 import { GameRoom } from './pages/GameRoom';
+import { WavelengthLobby } from './pages/WavelengthLobby';
+import { WavelengthRoom } from './pages/WavelengthRoom';
 import { supabase } from './lib/supabase';
 
 function App() {
@@ -19,8 +22,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/room/:roomId" element={<GameRoom />} />
+        <Route path="/" element={<GameHub />} />
+        <Route path="/scipher" element={<Home />} />
+        <Route path="/scipher/:roomId" element={<GameRoom />} />
+        <Route path="/wavelength" element={<WavelengthLobby />} />
+        <Route path="/wavelength/:roomId" element={<WavelengthRoom />} />
       </Routes>
     </BrowserRouter>
   );

@@ -4,9 +4,9 @@ import { Layout } from '../components/Layout';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { supabase } from '../lib/supabase';
-import { Users, Zap } from 'lucide-react';
+import { Radio, Users } from 'lucide-react';
 
-export const Home: React.FC = () => {
+export const WavelengthLobby: React.FC = () => {
     const navigate = useNavigate();
     const [name, setName] = useState('');
     const [roomCode, setRoomCode] = useState('');
@@ -34,28 +34,34 @@ export const Home: React.FC = () => {
         try {
             const code = generateRoomCode();
 
+            // Create Player (Host)
+            const { data: { user } } = await supabase.auth.getUser();
+            let playerId = localStorage.getItem('cipher_player_id');
+            if (user) playerId = user.id;
+            if (!playerId) playerId = crypto.randomUUID();
+
             // Create Room
             const { error: roomError } = await supabase
                 .from('rooms')
                 .insert({
                     id: code,
                     status: 'lobby',
-                    game_type: 'scipher',
+                    game_type: 'wavelength',
                     current_round: 1,
                     total_rounds: 12,
-                    scores: { neon: 0, cyber: 0 }
+                    scores: { neon: 0, cyber: 0 },
+                    turn_describer_id: playerId, // Host is first describer
+                    wavelength_state: {
+                        target_percent: 50,
+                        dial_percent: 50,
+                        spectrum_card: { left: 'Hot', right: 'Cold' },
+                        revealed: false
+                    }
                 });
 
             if (roomError) throw roomError;
 
-            // Create Player (Host)
-            const { data: { user } } = await supabase.auth.getUser();
-
-            // Use existing ID from local storage, or auth ID, or generate new one
-            let playerId = localStorage.getItem('cipher_player_id');
-            if (user) playerId = user.id;
-            if (!playerId) playerId = crypto.randomUUID();
-
+            // Create Player Record
             const { error: playerError } = await supabase
                 .from('players')
                 .upsert({
@@ -63,16 +69,15 @@ export const Home: React.FC = () => {
                     room_id: code,
                     name: name,
                     is_host: true,
-                    team: null // User picks team in the next screen
+                    team: null
                 });
 
             if (playerError) throw playerError;
 
-            // Store player ID in local storage for reconnection
             localStorage.setItem('cipher_player_id', playerId);
             localStorage.setItem('cipher_player_name', name);
 
-            navigate(`/scipher/${code}`);
+            navigate(`/wavelength/${code}`);
         } catch (err: any) {
             console.error(err);
             setError(err.message || 'Failed to create room');
@@ -96,15 +101,19 @@ export const Home: React.FC = () => {
         try {
             const code = roomCode.toUpperCase();
 
-            // Check if room exists
+            // Check if room exists and is Wavelength
             const { data: room, error: roomCheckError } = await supabase
                 .from('rooms')
-                .select('status')
+                .select('status, game_type')
                 .eq('id', code)
                 .single();
 
             if (roomCheckError || !room) {
                 throw new Error('Room not found');
+            }
+
+            if (room.game_type !== 'wavelength') {
+                throw new Error('This is not a Wavelength room');
             }
 
             if (room.status !== 'lobby') {
@@ -113,8 +122,6 @@ export const Home: React.FC = () => {
 
             // Create Player
             const { data: { user } } = await supabase.auth.getUser();
-
-            // Use existing ID from local storage, or auth ID, or generate new one
             let playerId = localStorage.getItem('cipher_player_id');
             if (user) playerId = user.id;
             if (!playerId) playerId = crypto.randomUUID();
@@ -134,7 +141,7 @@ export const Home: React.FC = () => {
             localStorage.setItem('cipher_player_id', playerId);
             localStorage.setItem('cipher_player_name', name);
 
-            navigate(`/scipher/${code}`);
+            navigate(`/wavelength/${code}`);
         } catch (err: any) {
             console.error(err);
             setError(err.message || 'Failed to join room');
@@ -146,72 +153,68 @@ export const Home: React.FC = () => {
     return (
         <Layout>
             <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-12">
-
-                {/* Rebranded Header */}
                 <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="flex justify-center mb-6">
-                        <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-[0_0_40px_rgba(124,58,237,0.5)] rotate-3 hover:rotate-6 transition-transform duration-500">
-                            <Zap className="w-10 h-10 text-white fill-white" />
-                        </div>
+                    <div className="inline-flex items-center justify-center p-4 bg-rose-500/10 rounded-full mb-6 ring-1 ring-rose-500/50 shadow-[0_0_30px_rgba(244,63,94,0.3)]">
+                        <Radio className="w-12 h-12 text-rose-500" />
                     </div>
-                    <h1 className="text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 mb-4 drop-shadow-2xl">
-                        SCIPHER
+                    <h1 className="text-6xl font-black text-white tracking-tighter drop-shadow-2xl mb-2">
+                        WAVELENGTH
                     </h1>
-                    <p className="text-slate-400 text-xl font-medium tracking-wide">
-                        The Ultimate Team Word Game
+                    <p className="text-slate-400 text-lg font-light tracking-wide">
+                        Tune into your team's frequency.
                     </p>
                 </div>
 
-                <div className="w-full max-w-sm space-y-6 bg-slate-800/50 p-8 rounded-2xl border border-slate-700 backdrop-blur-sm shadow-2xl">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-300">Your Codename</label>
+                <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
+                    <div className="space-y-4">
                         <Input
-                            placeholder="Enter your name..."
+                            placeholder="Enter your name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            maxLength={12}
+                            className="bg-slate-900/50 border-slate-800 focus:border-rose-500 focus:ring-rose-500/20 text-lg py-6"
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pt-4">
+                    <div className="grid grid-cols-2 gap-4">
                         <Button
-                            variant="gold"
                             onClick={handleCreateRoom}
                             disabled={isCreating || isJoining}
-                            className="w-full"
+                            className="h-32 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-rose-600 to-rose-800 hover:from-rose-500 hover:to-rose-700 border-0 shadow-lg hover:shadow-rose-500/25 transition-all duration-300"
                         >
-                            {isCreating ? 'Creating...' : 'Create Room'}
+                            <Radio className="w-8 h-8" />
+                            <span className="text-lg font-bold">Create Room</span>
                         </Button>
 
                         <div className="space-y-2">
                             <Input
-                                placeholder="CODE"
-                                className="text-center uppercase tracking-widest font-mono"
+                                placeholder="Room Code"
                                 value={roomCode}
                                 onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                                 maxLength={4}
+                                className="text-center uppercase tracking-[0.5em] font-mono bg-slate-900/50 border-slate-800 focus:border-rose-500 focus:ring-rose-500/20 h-[3.5rem]"
                             />
                             <Button
-                                variant="royal"
                                 onClick={handleJoinRoom}
                                 disabled={isCreating || isJoining}
-                                className="w-full"
+                                className="w-full h-[calc(8rem-4.5rem)] bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300"
                             >
-                                {isJoining ? 'Joining...' : 'Join Room'}
+                                <Users className="w-5 h-5 mr-2" />
+                                Join Room
                             </Button>
                         </div>
                     </div>
 
                     {error && (
-                        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm text-center">
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-center text-sm font-medium animate-in fade-in slide-in-from-top-2">
                             {error}
                         </div>
                     )}
-                </div>
 
-                <div className="flex items-center space-x-2 text-slate-500 text-sm">
-                    <Users className="w-4 h-4" />
-                    <span>Team based • Real-time • Fast paced</span>
+                    <div className="text-center">
+                        <button onClick={() => navigate('/')} className="text-slate-500 hover:text-slate-300 text-sm underline underline-offset-4 transition-colors">
+                            Back to Game Hub
+                        </button>
+                    </div>
                 </div>
             </div>
         </Layout>
