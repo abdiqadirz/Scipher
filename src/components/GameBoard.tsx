@@ -63,7 +63,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ room, players, messages, c
         }).eq('id', room.id);
     };
 
-    const handleTurnEnd = async () => {
+    const handleTurnEnd = async (currentScores?: any) => {
         if (room.current_round >= room.total_rounds) {
             await supabase.from('rooms').update({
                 status: 'finished',
@@ -101,8 +101,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ room, players, messages, c
         const shuffledWords = [...WORD_BANK].sort(() => 0.5 - Math.random());
         const selectedWords = shuffledWords.slice(0, room.words_per_turn || 10);
 
+        // Use provided scores or fallback to current room scores (handling stale state)
+        const baseScores = currentScores || room.scores;
         const newScores = {
-            ...room.scores,
+            ...baseScores,
             [nextTeam === 'neon' ? 'neon_turn_index' : 'cyber_turn_index']: nextIndex
         };
 
@@ -135,14 +137,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({ room, players, messages, c
             [teamScoreKey]: room.scores[teamScoreKey] + points
         };
 
-        await supabase.from('rooms').update({
-            scores: newScores,
-            current_words: updatedWords
-        }).eq('id', room.id);
-
         // Check if all words guessed
         if (updatedWords.every(w => w.guessed)) {
-            handleTurnEnd();
+            // Pass the new scores directly to avoid race condition
+            await handleTurnEnd(newScores);
+        } else {
+            await supabase.from('rooms').update({
+                scores: newScores,
+                current_words: updatedWords
+            }).eq('id', room.id);
         }
     };
 
@@ -224,10 +227,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ room, players, messages, c
         <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] p-4 gap-6 bg-slate-950">
             {showConfetti && <Confetti numberOfPieces={200} recycle={false} />}
 
-            {/* Left Panel: Game Grid OR Guess Board */}
+            {/* Main Content Area */}
             <div className={clsx(
                 "bg-slate-900/80 backdrop-blur-xl rounded-[2rem] border border-slate-800/50 p-8 overflow-hidden flex flex-col relative shadow-2xl transition-all duration-500",
-                showChat ? "flex-1" : "w-full max-w-7xl mx-auto"
+                isActiveGuesser ? "w-full max-w-3xl mx-auto" : "w-full max-w-7xl mx-auto"
             )}>
                 {/* Header (Visible to ALL) */}
                 <div className="flex justify-between items-center mb-8">
@@ -262,32 +265,56 @@ export const GameBoard: React.FC<GameBoardProps> = ({ room, players, messages, c
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 relative">
+                <div className="flex-1 relative flex flex-col">
                     {isActiveGuesser ? (
-                        /* GUESS BOARD (Active Guesser View) */
-                        <div className="h-full overflow-y-auto flex flex-col-reverse space-y-reverse space-y-3 pr-2 scrollbar-hide">
-                            <div className="flex flex-col gap-3 justify-end min-h-0 pb-4">
-                                {messages.map((msg, idx) => {
-                                    if (msg.type === 'guess_correct') {
-                                        return (
-                                            <div key={idx} className="flex items-center gap-4 animate-in slide-in-from-bottom-4 zoom-in-90 duration-300">
-                                                <div className="bg-green-500/20 p-2 rounded-full border border-green-500/50">
-                                                    <Sparkles className="w-6 h-6 text-green-400" />
+                        /* GUESSER VIEW: Centralized Chat + Feedback Below */
+                        <div className="flex flex-col h-full gap-6">
+                            {/* Chat Area - Centralized */}
+                            <div className="flex-1 bg-slate-950/50 rounded-2xl border border-slate-800/50 overflow-hidden shadow-inner relative">
+                                <Chat
+                                    messages={messages}
+                                    onSendMessage={handleSendMessage}
+                                    currentUserTeam={currentPlayer?.team}
+                                    disabled={false}
+                                />
+                            </div>
+
+                            {/* Feedback Area - Minimalistic, Below Chat */}
+                            <div className="h-24 flex items-center justify-center">
+                                {messages.slice().reverse().find(m => m.type === 'guess_correct' || m.type === 'guess_incorrect') && (
+                                    (() => {
+                                        const lastFeedback = messages.slice().reverse().find(m => m.type === 'guess_correct' || m.type === 'guess_incorrect');
+                                        if (!lastFeedback) return null;
+
+                                        // Only show recent feedback (within last 3 seconds) could be handled by a separate state, 
+                                        // but for now we just show the last one. 
+                                        // Ideally we'd filter by timestamp but we don't have it easily accessible here without parsing.
+                                        // Let's just show it.
+
+                                        if (lastFeedback.type === 'guess_correct') {
+                                            return (
+                                                <div key={lastFeedback.id || 'correct'} className="flex flex-col items-center animate-in zoom-in duration-300">
+                                                    <div className="flex items-center gap-3 text-green-400 mb-1">
+                                                        <Sparkles className="w-5 h-5" />
+                                                        <span className="text-sm font-bold uppercase tracking-widest">Correct!</span>
+                                                    </div>
+                                                    <div className="text-3xl font-black text-white tracking-tight">
+                                                        {lastFeedback.content}
+                                                    </div>
                                                 </div>
-                                                <div className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 font-black text-5xl uppercase tracking-tight drop-shadow-lg">
-                                                    {msg.content}
+                                            );
+                                        } else {
+                                            return (
+                                                <div key={lastFeedback.id || 'incorrect'} className="flex flex-col items-center animate-in shake duration-300">
+                                                    <span className="text-red-500/50 text-xs font-bold uppercase tracking-widest mb-1">Missed</span>
+                                                    <div className="text-2xl font-bold text-red-400/80 line-through decoration-2 decoration-red-500/50">
+                                                        {lastFeedback.content}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    } else if (msg.type === 'guess_incorrect') {
-                                        return (
-                                            <div key={idx} className="text-red-500/30 font-bold text-3xl line-through decoration-4 decoration-red-500/30 uppercase tracking-tight animate-in slide-in-from-left-2 duration-200">
-                                                {msg.content}
-                                            </div>
-                                        );
-                                    }
-                                    return null;
-                                })}
+                                            );
+                                        }
+                                    })()
+                                )}
                             </div>
                         </div>
                     ) : (
@@ -368,8 +395,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ room, players, messages, c
                 </div>
             </div>
 
-            {/* Right Panel: Chat Input (Visible ONLY to Active Guessers) */}
-            {showChat && (
+            {/* Right Panel: Chat Input (Visible ONLY to Active Guessers - REMOVED as it's now integrated) */}
+            {!isActiveGuesser && showChat && (
                 <div className="w-full h-64 lg:h-auto lg:w-96 bg-slate-900/90 backdrop-blur-xl rounded-[2rem] border border-slate-800/50 flex flex-col overflow-hidden shrink-0 shadow-2xl animate-in slide-in-from-right-8 duration-700">
                     <Chat
                         messages={messages}
