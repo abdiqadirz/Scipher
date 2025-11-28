@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Brain, Radio, ArrowRight, Crown } from 'lucide-react';
+import { Brain, Radio, ArrowRight, Crown, Sprout } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Layout } from '../components/Layout';
 
@@ -29,6 +29,17 @@ export const GameHub: React.FC = () => {
             border: 'border-royal/20',
             shadow: 'shadow-royal/10',
             path: '/wavelength'
+        },
+        {
+            id: 'the_plant',
+            title: 'THE PLANT',
+            description: 'A social deduction game. Hide the secret word in your story.',
+            icon: Sprout,
+            color: 'text-emerald-400',
+            gradient: 'from-emerald-400 to-emerald-600',
+            border: 'border-emerald-500/20',
+            shadow: 'shadow-emerald-500/10',
+            path: '/the-plant'
         }
     ];
 
@@ -45,7 +56,7 @@ export const GameHub: React.FC = () => {
 
                     <div className="relative">
                         <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-silver-light to-silver drop-shadow-2xl">
-                            CIPHER<span className="text-gold">SAY</span>
+                            FUTURE <span className="text-gold">SHEIKHS</span> GAMES
                         </h1>
                         <div className="absolute -inset-10 bg-gold/20 blur-[100px] -z-10 animate-pulse-slow" />
                     </div>

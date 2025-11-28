@@ -3,7 +3,7 @@ create table public.rooms (
   id text primary key,
   created_at timestamptz default now(),
   status text check (status in ('lobby', 'playing', 'finished')) default 'lobby',
-  game_type text check (game_type in ('scipher', 'wavelength')) default 'scipher',
+  game_type text check (game_type in ('scipher', 'wavelength', 'the_plant')) default 'scipher',
   current_round int default 1,
   total_rounds int default 12,
   round_length int default 60,
@@ -13,6 +13,7 @@ create table public.rooms (
   current_word jsonb,
   scores jsonb default '{"neon": 0, "cyber": 0}'::jsonb,
   wavelength_state jsonb,
+  plant_state jsonb,
   last_updated timestamptz default now()
 );
 

@@ -5,6 +5,8 @@ import { Home } from './pages/Home';
 import { GameRoom } from './pages/GameRoom';
 import { WavelengthLobby } from './pages/WavelengthLobby';
 import { WavelengthRoom } from './pages/WavelengthRoom';
+import { ThePlantLobby } from './pages/ThePlantLobby';
+import { ThePlantRoom } from './pages/ThePlantRoom';
 import { supabase } from './lib/supabase';
 
 function App() {
@@ -27,6 +29,8 @@ function App() {
         <Route path="/scipher/:roomId" element={<GameRoom />} />
         <Route path="/wavelength" element={<WavelengthLobby />} />
         <Route path="/wavelength/:roomId" element={<WavelengthRoom />} />
+        <Route path="/the-plant" element={<ThePlantLobby />} />
+        <Route path="/the-plant/:roomId" element={<ThePlantRoom />} />
       </Routes>
     </BrowserRouter>
   );

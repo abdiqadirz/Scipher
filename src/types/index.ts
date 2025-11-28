@@ -48,7 +48,27 @@ export interface Room {
         };
         revealed: boolean;
     };
+    plant_state?: PlantGameState;
     last_updated: string;
+}
+
+export type PlantPhase = 'draft' | 'monologue' | 'grill' | 'huddle' | 'verdict' | 'scoreboard';
+
+export interface PlantGameState {
+    phase: PlantPhase;
+    active_planter_id: string;
+    current_topic: string;
+    candidate_words: string[];
+    secret_word: string | null;
+    audience_guesses: Record<string, string>; // PlayerID -> Guessed Word
+    round_scores: Record<string, number>; // PlayerID -> Score for this round
+    settings: {
+        draft_time: number;
+        monologue_time: number;
+        grill_time: number;
+        huddle_time: number;
+        total_pot: number;
+    };
 }
 
 export interface Message {

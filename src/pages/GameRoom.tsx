@@ -181,13 +181,18 @@ export const GameRoom: React.FC = () => {
             <div className="space-y-8">
                 {/* Header */}
                 <div className="flex justify-between items-center border-b border-slate-800 pb-6">
-                    <div>
-                        <h1 className="text-3xl font-black tracking-tighter text-white">
-                            ROOM <span className="text-royal font-mono">{room.id}</span>
-                        </h1>
-                        <p className="text-slate-400 text-sm">
-                            Status: <span className="uppercase font-bold text-gold">{room.status}</span>
-                        </p>
+                    <div className="flex items-center gap-4">
+                        <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="text-xs tracking-widest uppercase border border-white/10 hover:bg-white/5">
+                            Exit
+                        </Button>
+                        <div>
+                            <h1 className="text-3xl font-black tracking-tighter text-white">
+                                ROOM <span className="text-royal font-mono">{room.id}</span>
+                            </h1>
+                            <p className="text-slate-400 text-sm">
+                                Status: <span className="uppercase font-bold text-gold">{room.status}</span>
+                            </p>
+                        </div>
                     </div>
                     {isHost && room.status === 'lobby' && (
                         <Button variant="gold" size="lg" onClick={handleStartGame}>
