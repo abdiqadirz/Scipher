@@ -1,123 +1,139 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Brain, Radio, ArrowRight, Crown, Sprout } from 'lucide-react';
+import { Brain, Radio, Sprout, ArrowRight, Terminal } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Layout } from '../components/Layout';
 
 export const GameHub: React.FC = () => {
     const navigate = useNavigate();
+    const [hoveredId, setHoveredId] = useState<string | null>(null);
 
     const games = [
         {
             id: 'scipher',
             title: 'SCIPHER',
-            description: 'The ultimate team word-guessing game. Decode the message.',
+            subtitle: 'DECRYPTION PROTOCOL',
+            description: 'Collaborative linguistic decryption. Intercept and decode enemy transmissions.',
             icon: Brain,
-            color: 'text-gold',
-            gradient: 'from-gold to-gold-dark',
-            border: 'border-gold/20',
-            shadow: 'shadow-gold/10',
-            path: '/scipher'
+            path: '/scipher',
+            stats: { players: '4-12', time: '20m' }
         },
         {
             id: 'wavelength',
             title: 'WAVELENGTH',
-            description: 'Tune into your team\'s frequency. Find the hidden target.',
+            subtitle: 'FREQUENCY SYNC',
+            description: 'Psychic spectrum alignment. Tune into the collective consciousness.',
             icon: Radio,
-            color: 'text-royal-light',
-            gradient: 'from-royal-light to-royal',
-            border: 'border-royal/20',
-            shadow: 'shadow-royal/10',
-            path: '/wavelength'
+            path: '/wavelength',
+            stats: { players: '2-10', time: '15m' }
         },
         {
             id: 'the_plant',
             title: 'THE PLANT',
-            description: 'A social deduction game. Hide the secret word in your story.',
+            subtitle: 'SOCIAL INFILTRATION',
+            description: 'Identify the anomaly. A high-stakes test of deception and deduction.',
             icon: Sprout,
-            color: 'text-emerald-400',
-            gradient: 'from-emerald-400 to-emerald-600',
-            border: 'border-emerald-500/20',
-            shadow: 'shadow-emerald-500/10',
-            path: '/the-plant'
+            path: '/the-plant',
+            stats: { players: '3-8', time: '30m' }
         }
     ];
 
     return (
         <Layout>
-            <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-16">
+            <div className="h-full flex flex-col gap-8">
 
-                {/* Hero Section */}
-                <div className="text-center space-y-6 animate-in fade-in slide-in-from-top-8 duration-1000">
-                    <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/5 border border-white/10 text-gold text-sm font-bold tracking-widest uppercase backdrop-blur-md shadow-lg animate-float">
-                        <Crown className="w-4 h-4" />
-                        <span>Premium Game Suite</span>
+                {/* Header Section */}
+                <div className="flex-none text-center space-y-2 pt-4">
+                    <div className="inline-flex items-center gap-2 px-4 py-1 border border-accent/20 bg-accent/5 rounded-none clip-corner">
+                        <Terminal className="w-3 h-3 text-accent" />
+                        <span className="font-mono text-[10px] tracking-[0.3em] text-accent uppercase">Secure Access Terminal</span>
                     </div>
-
-                    <div className="relative">
-                        <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-silver-light to-silver drop-shadow-2xl">
-                            FUTURE <span className="text-gold">SHEIKHS</span> GAMES
-                        </h1>
-                        <div className="absolute -inset-10 bg-gold/20 blur-[100px] -z-10 animate-pulse-slow" />
-                    </div>
-
-                    <p className="text-xl text-silver max-w-2xl mx-auto font-light tracking-wide leading-relaxed">
-                        Elevate your game night with our collection of <span className="text-gold font-medium">luxury social experiences</span>.
-                    </p>
+                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-highlight via-highlight/80 to-mid drop-shadow-2xl">
+                        FUTURE <span className="text-accent">SHEIKHS</span>
+                    </h1>
                 </div>
 
-                {/* Game Cards */}
-                <div className="grid md:grid-cols-2 gap-8 w-full max-w-5xl px-4">
-                    {games.map((game, idx) => (
-                        <div
-                            key={game.id}
-                            onClick={() => navigate(game.path)}
-                            className={clsx(
-                                "group relative p-10 rounded-[2rem] border cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] flex flex-col gap-8 overflow-hidden glass-panel",
-                                game.border,
-                                "hover:border-white/20"
-                            )}
-                            style={{ animationDelay: `${idx * 200}ms` }}
-                        >
-                            {/* Hover Gradient Overlay */}
-                            <div className={clsx(
-                                "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br pointer-events-none",
-                                game.id === 'scipher' ? "from-gold/10 via-transparent to-transparent" : "from-royal/10 via-transparent to-transparent"
-                            )} />
+                {/* Harmonic Accordion */}
+                <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-0 pb-8">
+                    {games.map((game) => {
+                        const isHovered = hoveredId === game.id;
+                        const isDimmed = hoveredId !== null && !isHovered;
 
-                            <div className="flex items-start justify-between relative z-10">
+                        return (
+                            <div
+                                key={game.id}
+                                onMouseEnter={() => setHoveredId(game.id)}
+                                onMouseLeave={() => setHoveredId(null)}
+                                onClick={() => navigate(game.path)}
+                                className={clsx(
+                                    "relative group cursor-pointer overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]",
+                                    "border border-mid/30 bg-base/40 backdrop-blur-sm clip-corner",
+                                    "flex flex-col justify-between p-8",
+                                    isHovered ? "flex-[3] opacity-100 border-accent/50 bg-base/80" : "flex-[1] opacity-90 hover:opacity-100",
+                                    isDimmed && "opacity-60 blur-[1px]"
+                                )}
+                            >
+                                {/* Background Grid Effect */}
+                                <div className="absolute inset-0 opacity-10 pointer-events-none bg-[linear-gradient(rgba(163,176,135,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(163,176,135,0.1)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+
+                                {/* Hover Glow */}
                                 <div className={clsx(
-                                    "p-5 rounded-2xl bg-gradient-to-br shadow-lg group-hover:shadow-2xl transition-all duration-500",
-                                    game.gradient
+                                    "absolute -right-20 -bottom-20 w-64 h-64 rounded-full blur-[80px] transition-opacity duration-500",
+                                    isHovered ? "opacity-20 bg-accent" : "opacity-0"
+                                )}></div>
+
+                                {/* Top Content */}
+                                <div className="relative z-10 flex justify-between items-start">
+                                    <div className={clsx(
+                                        "p-6 border border-mid/30 bg-base/50 transition-all duration-500 rounded-2xl flex items-center justify-center",
+                                        isHovered ? "scale-110 border-accent/50 text-accent shadow-[0_0_30px_rgba(163,176,135,0.3)]" : "text-mid scale-100"
+                                    )}>
+                                        <game.icon className="w-16 h-16" />
+                                    </div>
+                                    <div className="font-mono text-xs text-mid tracking-widest">
+                                        ID: {game.id.toUpperCase()}
+                                    </div>
+                                </div>
+
+                                {/* Middle Content (Description - Only visible on hover/expand) */}
+                                <div className={clsx(
+                                    "relative z-10 space-y-4 transition-all duration-500 delay-100",
+                                    isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 absolute bottom-20"
                                 )}>
-                                    <game.icon className="w-12 h-12 text-obsidian" />
+                                    <div className="h-[1px] w-12 bg-accent/50"></div>
+                                    <p className="text-lg font-light leading-relaxed text-highlight/90 max-w-md">
+                                        {game.description}
+                                    </p>
+                                    <div className="flex gap-4 font-mono text-xs text-accent/80">
+                                        <span className="border border-accent/20 px-2 py-1">PLAYERS: {game.stats.players}</span>
+                                        <span className="border border-accent/20 px-2 py-1">EST. TIME: {game.stats.time}</span>
+                                    </div>
                                 </div>
-                                <div className="p-3 rounded-full bg-white/5 text-silver group-hover:text-white group-hover:bg-white/10 transition-colors border border-white/5 group-hover:border-white/20">
-                                    <ArrowRight className="w-6 h-6" />
+
+                                {/* Bottom Content */}
+                                <div className="relative z-10 mt-auto pt-8">
+                                    <div className="flex items-end justify-between">
+                                        <div>
+                                            <div className="font-mono text-xs text-accent tracking-[0.2em] mb-1">{game.subtitle}</div>
+                                            <h2 className={clsx(
+                                                "font-orbitron font-black tracking-tighter transition-all duration-500",
+                                                isHovered ? "text-5xl text-highlight" : "text-3xl text-mid group-hover:text-highlight/70"
+                                            )}>
+                                                {game.title}
+                                            </h2>
+                                        </div>
+
+                                        <div className={clsx(
+                                            "p-2 border border-accent/30 transition-all duration-300",
+                                            isHovered ? "bg-accent text-base rotate-0" : "text-accent -rotate-45 opacity-0"
+                                        )}>
+                                            <ArrowRight className="w-6 h-6" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div className="space-y-3 relative z-10">
-                                <h2 className={clsx("text-5xl font-black tracking-tighter", game.color)}>
-                                    {game.title}
-                                </h2>
-                                <p className="text-silver text-lg font-light leading-relaxed">
-                                    {game.description}
-                                </p>
-                            </div>
-
-                            {/* Decorative Glow */}
-                            <div className={clsx(
-                                "absolute -bottom-24 -right-24 w-64 h-64 rounded-full blur-[80px] opacity-20 transition-opacity duration-500 group-hover:opacity-40",
-                                game.id === 'scipher' ? "bg-gold" : "bg-royal"
-                            )} />
-                        </div>
-                    ))}
-                </div>
-
-                {/* Footer */}
-                <div className="text-silver/30 text-xs font-mono tracking-[0.2em] uppercase">
-                    Designed for Excellence
+                        );
+                    })}
                 </div>
             </div>
         </Layout>

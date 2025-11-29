@@ -14,7 +14,14 @@ import { TOPICS, NOUNS } from '../lib/plant_data';
 // Helper to fetch random words from API with fallback
 const getRandomWords = async (count: number): Promise<string[]> => {
     try {
-        const response = await fetch(`https://random-word-api.herokuapp.com/word?number=${count}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout
+
+        const response = await fetch(`https://random-word-api.herokuapp.com/word?number=${count}`, {
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
         if (response.ok) {
             const words = await response.json();
             if (Array.isArray(words) && words.length === count) {
