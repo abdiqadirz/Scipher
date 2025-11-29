@@ -122,7 +122,12 @@ export const GameRoom: React.FC = () => {
         const firstDescriber = teamPlayers[firstDescriberIndex];
 
         // Pick N random words
-        const shuffledWords = [...WORD_BANK].sort(() => 0.5 - Math.random());
+        const difficulty = room.difficulty || 'medium';
+        const filteredWords = WORD_BANK.filter(w => w.difficulty === difficulty);
+        // Fallback if not enough words: use all words
+        const pool = filteredWords.length >= (room.words_per_turn || 10) ? filteredWords : WORD_BANK;
+
+        const shuffledWords = [...pool].sort(() => 0.5 - Math.random());
         const selectedWords = shuffledWords.slice(0, room.words_per_turn || 10);
 
         await supabase.from('rooms').update({
@@ -141,10 +146,13 @@ export const GameRoom: React.FC = () => {
         }).eq('id', room.id);
     };
 
-    const handleUpdateSettings = async (field: 'total_rounds' | 'round_length' | 'words_per_turn', value: number) => {
+    const handleUpdateSettings = async (field: 'total_rounds' | 'round_length' | 'words_per_turn' | 'difficulty', value: number | string) => {
         if (!room) return;
         // Basic validation
-        const safeValue = value < 1 ? 1 : value;
+        let safeValue = value;
+        if (typeof value === 'number') {
+            safeValue = value < 1 ? 1 : value;
+        }
         await supabase.from('rooms').update({ [field]: safeValue }).eq('id', room.id);
     };
 
@@ -231,7 +239,7 @@ export const GameRoom: React.FC = () => {
                                                 max={300}
                                             />
                                         </div>
-                                        <div className="space-y-1 col-span-2">
+                                        <div className="space-y-1">
                                             <label className="text-xs uppercase font-bold text-slate-500">Words per Turn</label>
                                             <Input
                                                 type="number"
@@ -242,12 +250,26 @@ export const GameRoom: React.FC = () => {
                                                 max={50}
                                             />
                                         </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs uppercase font-bold text-slate-500">Difficulty</label>
+                                            <select
+                                                value={room.difficulty || 'medium'}
+                                                onChange={(e) => handleUpdateSettings('difficulty', e.target.value)}
+                                                className="w-full h-9 bg-slate-900 border border-slate-700 rounded-md text-white text-sm px-2 focus:outline-none focus:border-gold"
+                                            >
+                                                <option value="easy">Easy</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="hard">Hard</option>
+                                                <option value="superhard">Superhard</option>
+                                            </select>
+                                        </div>
                                     </>
                                 ) : (
                                     <>
                                         <div>Rounds: <span className="text-white font-mono">{room.total_rounds}</span></div>
                                         <div>Round Length: <span className="text-white font-mono">{room.round_length}s</span></div>
                                         <div>Words/Turn: <span className="text-white font-mono">{room.words_per_turn || 10}</span></div>
+                                        <div>Difficulty: <span className="text-white font-mono uppercase">{room.difficulty || 'medium'}</span></div>
                                     </>
                                 )}
                             </div>

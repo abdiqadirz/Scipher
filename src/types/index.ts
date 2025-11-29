@@ -23,13 +23,14 @@ export interface Room {
     total_rounds: number;
     round_length: number;
     words_per_turn: number;
+    difficulty: 'easy' | 'medium' | 'hard' | 'superhard';
     turn_team: Team;
     turn_phase: 'ready' | 'playing';
     turn_describer_id: string | null;
     turn_end_time: string | null;
     current_words: {
         word: string;
-        difficulty: 'easy' | 'medium' | 'hard';
+        difficulty: 'easy' | 'medium' | 'hard' | 'superhard';
         points: number;
         guessed?: boolean;
     }[] | null;

@@ -9,10 +9,24 @@ import { Scratchpad } from '../components/Scratchpad';
 import { Sprout, Clock, Crown, Users, Check } from 'lucide-react';
 import Confetti from 'react-confetti';
 import { clsx } from 'clsx';
+import { TOPICS, NOUNS } from '../lib/plant_data';
 
-// Helper to generate random topics and words (placeholder for now)
-const TOPICS = ["A Trip to the Dentist", "My First Date", "Cooking a Meal", "A Day at the Beach", "Lost in the Woods"];
-const NOUNS = ["Banana", "Monkey", "Tractor", "Spaceship", "Jellyfish", "Trumpet", "Cactus", "Velcro", "Poodle", "Lasagna"];
+// Helper to fetch random words from API with fallback
+const getRandomWords = async (count: number): Promise<string[]> => {
+    try {
+        const response = await fetch(`https://random-word-api.herokuapp.com/word?number=${count}`);
+        if (response.ok) {
+            const words = await response.json();
+            if (Array.isArray(words) && words.length === count) {
+                return words.map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)); // Capitalize
+            }
+        }
+    } catch (e) {
+        console.warn("Failed to fetch from word API, using static list", e);
+    }
+    // Fallback to static list
+    return NOUNS.sort(() => 0.5 - Math.random()).slice(0, count);
+};
 
 export const ThePlantRoom: React.FC = () => {
     const { roomId } = useParams();
@@ -102,20 +116,27 @@ export const ThePlantRoom: React.FC = () => {
         }).eq('id', room.id);
     };
 
-    const handleStartGame = async () => {
+    const handleStartGame = async (targetRound?: number) => {
         if (!room || players.length < 1) return; // Allow 1 player for testing
 
-        const randomPlanter = players[Math.floor(Math.random() * players.length)];
+        const nextRound = targetRound || 1;
+
+        // Sort players by ID to ensure consistent rotation order
+        const sortedPlayers = [...players].sort((a, b) => a.id.localeCompare(b.id));
+        const planterIndex = (nextRound - 1) % sortedPlayers.length;
+        const nextPlanter = sortedPlayers[planterIndex];
+
         const topic = TOPICS[Math.floor(Math.random() * TOPICS.length)];
-        const words = NOUNS.sort(() => 0.5 - Math.random()).slice(0, 3);
+        const words = await getRandomWords(3);
 
         await supabase.from('rooms').update({
             status: 'playing',
+            current_round: nextRound,
             turn_end_time: new Date(Date.now() + (room.plant_state?.settings.draft_time || 20) * 1000).toISOString(),
             plant_state: {
                 ...room.plant_state,
                 phase: 'draft',
-                active_planter_id: randomPlanter.id,
+                active_planter_id: nextPlanter.id,
                 current_topic: topic,
                 candidate_words: words,
                 secret_word: null,
@@ -200,7 +221,8 @@ export const ThePlantRoom: React.FC = () => {
     };
 
     const handleNextRound = async () => {
-        handleStartGame();
+        if (!room) return;
+        handleStartGame(room.current_round + 1);
         setShowConfetti(false);
         setVerdictInput('');
     };
@@ -299,7 +321,7 @@ export const ThePlantRoom: React.FC = () => {
                                 </div>
                             </div>
 
-                            <Button onClick={handleStartGame} size="lg" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black px-12 py-6 shadow-lg shadow-emerald-500/20">
+                            <Button onClick={() => handleStartGame(1)} size="lg" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black px-12 py-6 shadow-lg shadow-emerald-500/20">
                                 START GAME
                             </Button>
                         </div>
@@ -487,7 +509,7 @@ export const ThePlantRoom: React.FC = () => {
                                     </div>
 
                                     {isHost && (
-                                        <Button onClick={handleNextRound} size="lg" className="bg-white text-obsidian hover:bg-silver font-black px-12">
+                                        <Button onClick={() => handleNextRound()} size="lg" className="bg-white text-obsidian hover:bg-silver font-black px-12">
                                             NEXT ROUND
                                         </Button>
                                     )}

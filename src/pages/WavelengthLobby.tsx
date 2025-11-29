@@ -120,9 +120,10 @@ export const WavelengthLobby: React.FC = () => {
                 throw new Error('This is not a Wavelength room');
             }
 
-            if (room.status !== 'lobby') {
-                throw new Error('Game already in progress');
-            }
+            // Allow joining mid-game
+            // if (room.status !== 'lobby') {
+            //     throw new Error('Game already in progress');
+            // }
 
             // Create Player
             const { data: { user } } = await supabase.auth.getUser();

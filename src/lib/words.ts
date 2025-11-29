@@ -1,6 +1,6 @@
 export interface Word {
     word: string;
-    difficulty: 'easy' | 'medium' | 'hard';
+    difficulty: 'easy' | 'medium' | 'hard' | 'superhard';
     points: number;
 }
 
@@ -65,4 +65,21 @@ export const WORD_BANK: Word[] = [
     { word: "Constellation", difficulty: 'hard', points: 5 },
     { word: "Civilization", difficulty: 'hard', points: 5 },
     { word: "Globalization", difficulty: 'hard', points: 5 },
+
+    // Superhard (10pts)
+    { word: "Quantum Mechanics", difficulty: 'superhard', points: 10 },
+    { word: "Existentialism", difficulty: 'superhard', points: 10 },
+    { word: "Schadenfreude", difficulty: 'superhard', points: 10 },
+    { word: "Antidisestablishmentarianism", difficulty: 'superhard', points: 10 },
+    { word: "Ephemeral", difficulty: 'superhard', points: 10 },
+    { word: "Ubiquitous", difficulty: 'superhard', points: 10 },
+    { word: "Serendipity", difficulty: 'superhard', points: 10 },
+    { word: "Idiosyncrasy", difficulty: 'superhard', points: 10 },
+    { word: "Obfuscate", difficulty: 'superhard', points: 10 },
+    { word: "Juxtaposition", difficulty: 'superhard', points: 10 },
+    { word: "Cacophony", difficulty: 'superhard', points: 10 },
+    { word: "Euphemism", difficulty: 'superhard', points: 10 },
+    { word: "Hyperbole", difficulty: 'superhard', points: 10 },
+    { word: "Paradox", difficulty: 'superhard', points: 10 },
+    { word: "Oxymoron", difficulty: 'superhard', points: 10 },
 ];
